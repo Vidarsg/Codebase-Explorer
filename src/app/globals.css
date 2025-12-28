@@ -1,0 +1,9 @@
+:root { color-scheme: dark; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #0b0f17;
+  color: #e8eefc;
+}
+a { color: inherit; }
+* { box-sizing: border-box; }
