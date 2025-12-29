@@ -2,21 +2,23 @@
 
 import type { TreeNode } from "@/lib/types";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function RepoTree({
   owner,
   repo,
   refName,
   nodes,
+  onSelectFile,
 }: {
   owner: string;
   repo: string;
   refName: string;
   nodes: TreeNode[];
+  onSelectFile: (path: string) => void;
 }) {
-  const router = useRouter();
   const [query, setQuery] = useState("");
+  const [loadedChildren, setLoadedChildren] = useState<Map<string, TreeNode[]>>(new Map());
+  const [loading, setLoading] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -25,14 +27,40 @@ export default function RepoTree({
     const matches: TreeNode[] = [];
     const walk = (n: TreeNode) => {
       if (n.type === "file" && n.path.toLowerCase().includes(q)) matches.push(n);
-      if (n.children) n.children.forEach(walk);
+      // Check loaded children too
+      const childList = loadedChildren.get(n.path);
+      if (childList) childList.forEach(walk);
     };
     nodes.forEach(walk);
     return matches.map((m) => ({ ...m })); // list view
-  }, [nodes, query]);
+  }, [nodes, query, loadedChildren]);
 
-  const openFile = (path: string) => {
-    router.push(`/repo/${owner}/${repo}/blob/${path}?ref=${encodeURIComponent(refName)}`);
+  const loadChildren = async (dirPath: string) => {
+    if (loadedChildren.has(dirPath) || loading.has(dirPath)) return;
+
+    const newLoading = new Set(loading);
+    newLoading.add(dirPath);
+    setLoading(newLoading);
+
+    try {
+      const res = await fetch(
+        `/api/repo/tree?owner=${owner}&repo=${repo}&ref=${encodeURIComponent(refName)}&path=${encodeURIComponent(dirPath)}`
+      );
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      // Store loaded children
+      const newLoadedChildren = new Map(loadedChildren);
+      newLoadedChildren.set(dirPath, data.nodes || []);
+      setLoadedChildren(newLoadedChildren);
+
+      newLoading.delete(dirPath);
+      setLoading(new Set(newLoading));
+    } catch (e) {
+      newLoading.delete(dirPath);
+      setLoading(new Set(newLoading));
+      console.error(`Failed to load ${dirPath}:`, e);
+    }
   };
 
   return (
@@ -63,7 +91,7 @@ export default function RepoTree({
         {filtered.length === 0 ? (
           <div style={{ opacity: 0.7 }}>No results</div>
         ) : (
-          <TreeList nodes={filtered} onOpenFile={openFile} depth={0} flat={Boolean(query.trim())} />
+          <TreeList nodes={filtered} onSelectFile={onSelectFile} depth={0} flat={Boolean(query.trim())} onLoadChildren={loadChildren} loadedChildren={loadedChildren} loading={loading} />
         )}
       </div>
     </div>
@@ -72,19 +100,25 @@ export default function RepoTree({
 
 function TreeList({
   nodes,
-  onOpenFile,
+  onSelectFile,
   depth,
   flat,
+  onLoadChildren,
+  loadedChildren,
+  loading,
 }: {
   nodes: TreeNode[];
-  onOpenFile: (path: string) => void;
+  onSelectFile: (path: string) => void;
   depth: number;
   flat: boolean;
+  onLoadChildren: (path: string) => Promise<void>;
+  loadedChildren: Map<string, TreeNode[]>;
+  loading: Set<string>;
 }) {
   return (
     <div>
       {nodes.map((n) => (
-        <TreeItem key={n.path} node={n} depth={depth} onOpenFile={onOpenFile} flat={flat} />
+        <TreeItem key={n.path} node={n} depth={depth} onSelectFile={onSelectFile} flat={flat} onLoadChildren={onLoadChildren} loadedChildren={loadedChildren} loading={loading} />
       ))}
     </div>
   );
@@ -93,21 +127,39 @@ function TreeList({
 function TreeItem({
   node,
   depth,
-  onOpenFile,
+  onSelectFile,
   flat,
+  onLoadChildren,
+  loadedChildren,
+  loading,
 }: {
   node: TreeNode;
   depth: number;
-  onOpenFile: (path: string) => void;
+  onSelectFile: (path: string) => void;
   flat: boolean;
+  onLoadChildren: (path: string) => Promise<void>;
+  loadedChildren: Map<string, TreeNode[]>;
+  loading: Set<string>;
 }) {
-  const [open, setOpen] = useState(depth < 1); // auto-open top level
+  const [open, setOpen] = useState(false); // Start closed, open on demand
   const pad = flat ? 0 : depth * 14;
+  const isLoading = loading.has(node.path);
+  const children = loadedChildren.get(node.path) || node.children;
+
+  const handleDirClick = async () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+
+    // Load children if expanding and not loaded
+    if (nextOpen && !loadedChildren.has(node.path) && node.children?.length === 0) {
+      await onLoadChildren(node.path);
+    }
+  };
 
   if (node.type === "file") {
     return (
       <div
-        onClick={() => onOpenFile(node.path)}
+        onClick={() => onSelectFile(node.path)}
         style={{
           padding: "6px 8px",
           marginLeft: pad,
@@ -125,10 +177,12 @@ function TreeItem({
   }
 
   // dir
+  const hasChildren = children && children.length > 0;
+
   return (
     <div>
       <div
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleDirClick}
         style={{
           padding: "6px 8px",
           marginLeft: pad,
@@ -141,11 +195,11 @@ function TreeItem({
         onMouseLeave={(e) => ((e.currentTarget.style.background = "transparent"))}
         title={node.path}
       >
-        {open ? "▾ " : "▸ "}
+        {isLoading ? "⟳ " : open ? "▾ " : "▸ "}
         {node.name}
       </div>
-      {open && node.children && (
-        <TreeList nodes={node.children} onOpenFile={onOpenFile} depth={depth + 1} flat={false} />
+      {open && hasChildren && (
+        <TreeList nodes={children} onSelectFile={onSelectFile} depth={depth + 1} flat={false} onLoadChildren={onLoadChildren} loadedChildren={loadedChildren} loading={loading} />
       )}
     </div>
   );

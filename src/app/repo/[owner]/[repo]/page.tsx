@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import RepoHeader from "@/components/RepoHeader";
 import RepoTree from "@/components/RepoTree";
-import type { RepoMeta, TreeNode } from "@/lib/types";
+import type { FileData, RepoMeta, TreeNode } from "@/lib/types";
 
 export default function RepoPage({
   params,
@@ -14,11 +15,17 @@ export default function RepoPage({
 }) {
   const { owner, repo } = params;
   const ref = searchParams.ref || "HEAD";
+  const queryParams = useSearchParams();
+  const router = useRouter();
 
   const [meta, setMeta] = useState<RepoMeta | null>(null);
   const [nodes, setNodes] = useState<TreeNode[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
+  const [selectedPath, setSelectedPath] = useState<string | null>(() => queryParams.get("path"));
+  const [file, setFile] = useState<FileData | null>(null);
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +52,50 @@ export default function RepoPage({
     };
   }, [owner, repo, ref]);
 
+  useEffect(() => {
+    if (!selectedPath) {
+      setFile(null);
+      setFileError(null);
+      router.replace(`/repo/${owner}/${repo}?ref=${encodeURIComponent(ref)}`);
+      return;
+    }
+
+    router.replace(`/repo/${owner}/${repo}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(selectedPath)}`);
+  }, [selectedPath, owner, repo, ref, router]);
+
+  useEffect(() => {
+    if (!selectedPath) {
+      setFile(null);
+      setFileError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingFile(true);
+    setFileError(null);
+
+    fetch(
+      `/api/repo/file?owner=${owner}&repo=${repo}&ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(selectedPath)}`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.error) throw new Error(data.error);
+        setFile(data);
+        setLoadingFile(false);
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setFileError(e.message || "Failed to load file");
+          setLoadingFile(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPath, owner, repo, ref]);
+
   const title = useMemo(() => `${owner}/${repo}`, [owner, repo]);
 
   return (
@@ -70,13 +121,37 @@ export default function RepoPage({
 
       <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 12, marginTop: 12 }}>
         <section style={{ background: "#111827", borderRadius: 12, padding: 10, minHeight: 520 }}>
-          <RepoTree owner={owner} repo={repo} refName={ref} nodes={nodes} />
+          <RepoTree owner={owner} repo={repo} refName={ref} nodes={nodes} onSelectFile={setSelectedPath} />
         </section>
 
         <section style={{ background: "#111827", borderRadius: 12, padding: 16, minHeight: 520 }}>
-          <div style={{ opacity: 0.85 }}>
-            Select a file from the tree.
-          </div>
+          {!selectedPath ? (
+            <div style={{ opacity: 0.85 }}>Select a file from the tree.</div>
+          ) : loadingFile ? (
+            <div style={{ opacity: 0.85 }}>Loading…</div>
+          ) : fileError ? (
+            <div style={{ color: "#fca5a5" }}>Error: {fileError}</div>
+          ) : file ? (
+            <div>
+              <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 12 }}>
+                {file.path}
+              </div>
+              <pre
+                style={{
+                  margin: 0,
+                  padding: 12,
+                  background: "#0f1626",
+                  borderRadius: 8,
+                  fontSize: 12,
+                  overflow: "auto",
+                  maxHeight: 480,
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                <code>{file.content}</code>
+              </pre>
+            </div>
+          ) : null}
         </section>
       </div>
     </main>

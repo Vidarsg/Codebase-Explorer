@@ -18,6 +18,8 @@ export type TreeNode = {
   type: "file" | "dir";
   size?: number;
   children?: TreeNode[];
+  isLoading?: boolean; // for load-on-expand
+  isLoaded?: boolean; // true if children have been fetched
 };
 
 export type FileData = {
