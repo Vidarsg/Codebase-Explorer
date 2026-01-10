@@ -6,7 +6,7 @@ import { z } from "zod";
 
 const OwnerRepo = z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/);
 
-function parseRepo(input: string): { owner: string; repo: string } | null {
+function parseRepo(input: string): { owner: string; repo: string } | "search" | null {
   const trimmed = input.trim();
 
   // URL
@@ -29,22 +29,36 @@ function parseRepo(input: string): { owner: string; repo: string } | null {
     return { owner, repo };
   }
 
+  // Just repo name - trigger search page
+  if (/^[A-Za-z0-9_.-]+$/.test(trimmed)) {
+    return "search";
+  }
+
   return null;
 }
 
 export default function RepoInput() {
   const router = useRouter();
-  const [value, setValue] = useState("vercel/next.js");
+  const [value, setValue] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   const go = () => {
     const parsed = parseRepo(value);
+    
     if (!parsed) {
-      setErr("Invalid input. Use owner/repo or https://github.com/owner/repo");
+      setErr("Invalid input");
       return;
     }
+    
     setErr(null);
-    router.push(`/repo/${parsed.owner}/${parsed.repo}`);
+    
+    if (parsed === "search") {
+      // Navigate to search page
+      router.push(`/search?q=${encodeURIComponent(value)}`);
+    } else {
+      // Navigate directly to repo
+      router.push(`/repo/${parsed.owner}/${parsed.repo}`);
+    }
   };
 
   return (
@@ -58,7 +72,7 @@ export default function RepoInput() {
               go();
             }
           }}
-          placeholder="owner/repo or https://github.com/..."
+          placeholder="owner, repo name, or GitHub URL..."
           style={{
             flex: 1,
             padding: "16px 18px",

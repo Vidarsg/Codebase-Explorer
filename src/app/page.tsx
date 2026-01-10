@@ -1,4 +1,4 @@
-import RepoInput from "@/components/RepoInput";
+import RepoInput from "@/components/RepoInput"; 
 
 export default function Home() {
   return (
@@ -71,33 +71,6 @@ export default function Home() {
           }}
         >
           <RepoInput />
-          
-          <div 
-            style={{ 
-              marginTop: 24, 
-              fontSize: 14,
-              color: "#94a3b8"
-            }}
-          >
-            <div style={{ marginBottom: 12, fontWeight: 500 }}>Try these examples:</div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {["vercel/next.js", "facebook/react", "microsoft/vscode"].map((example) => (
-                <code 
-                  key={example}
-                  style={{ 
-                    background: "rgba(15, 23, 42, 0.8)",
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    fontSize: 13,
-                    border: "1px solid rgba(59, 130, 246, 0.2)",
-                    color: "#60a5fa"
-                  }}
-                >
-                  {example}
-                </code>
-              ))}
-            </div>
-          </div>
         </div>
         
         <div 

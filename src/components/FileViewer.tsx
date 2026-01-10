@@ -7,7 +7,7 @@ function langFromName(name: string) {
   name; // unused for plain rendering
 }
 
-export default function FileViewer({ file }: { file: FileData }) {
+export default function FileViewer({ file }: { file: FileData }) { 
   return (
     <section 
       style={{ 
