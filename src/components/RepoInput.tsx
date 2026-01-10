@@ -52,6 +52,11 @@ export default function RepoInput() {
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            go();
+          }
+        }}
         placeholder="owner/repo or GitHub URL"
         style={{
           flex: 1,

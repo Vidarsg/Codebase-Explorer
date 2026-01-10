@@ -7,12 +7,31 @@ function formatNum(n: number) {
 export default function RepoHeader({ meta, refName }: { meta: RepoMeta; refName: string }) {
   const langEntries = Object.entries(meta.languages || {});
   const total = langEntries.reduce((s, [, v]) => s + v, 0);
+  const githubUrl = `https://github.com/${meta.fullName}`;
 
   return (
     <section style={{ marginTop: 12, background: "#111827", borderRadius: 12, padding: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <div style={{ fontSize: 18, marginBottom: 6 }}>{meta.fullName}</div>
+          <div style={{ fontSize: 18, marginBottom: 6 }}>
+            {meta.fullName}
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                marginLeft: 12,
+                fontSize: 14,
+                opacity: 0.8,
+                textDecoration: "none",
+                color: "#60a5fa",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+            >
+              View on GitHub →
+            </a>
+          </div>
           {meta.description && <div style={{ opacity: 0.85 }}>{meta.description}</div>}
           <div style={{ opacity: 0.75, marginTop: 8 }}>
             Branch/ref: <code>{refName}</code> • Updated:{" "}
