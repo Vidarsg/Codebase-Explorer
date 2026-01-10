@@ -48,40 +48,78 @@ export default function RepoInput() {
   };
 
   return (
-    <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
-      <input
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            go();
-          }
-        }}
-        placeholder="owner/repo or GitHub URL"
-        style={{
-          flex: 1,
-          padding: "12px 12px",
-          borderRadius: 10,
-          border: "1px solid #253047",
-          background: "#0f1626",
-          color: "#e8eefc",
-          outline: "none",
-        }}
-      />
-      <button
-        onClick={go}
-        style={{
-          padding: "12px 14px",
-          borderRadius: 10,
-          border: "1px solid #2a3855",
-          background: "#14213a",
-          color: "#e8eefc",
-          cursor: "pointer",
-        }}
-      >
-        Open
-      </button>
-      {err && <div style={{ marginTop: 8, opacity: 0.9, color: "#ffb4b4" }}>{err}</div>}
+    <div>
+      <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              go();
+            }
+          }}
+          placeholder="owner/repo or https://github.com/..."
+          style={{
+            flex: 1,
+            padding: "16px 18px",
+            borderRadius: 12,
+            border: "1px solid rgba(59, 130, 246, 0.3)",
+            background: "rgba(15, 23, 42, 0.6)",
+            color: "#f1f5f9",
+            outline: "none",
+            fontSize: 15,
+            transition: "all 0.2s ease",
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.6)";
+            e.currentTarget.style.background = "rgba(15, 23, 42, 0.9)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.3)";
+            e.currentTarget.style.background = "rgba(15, 23, 42, 0.6)";
+          }}
+        />
+        <button
+          onClick={go}
+          style={{
+            padding: "16px 28px",
+            borderRadius: 12,
+            border: "none",
+            background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+            color: "#ffffff",
+            cursor: "pointer",
+            fontSize: 15,
+            fontWeight: 600,
+            transition: "all 0.2s ease",
+            boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(59, 130, 246, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+          }}
+        >
+          Explore →
+        </button>
+      </div>
+      {err && (
+        <div 
+          style={{ 
+            marginTop: 12, 
+            padding: "10px 14px",
+            background: "rgba(239, 68, 68, 0.1)",
+            border: "1px solid rgba(239, 68, 68, 0.3)",
+            borderRadius: 8,
+            color: "#fca5a5",
+            fontSize: 14
+          }}
+        >
+          {err}
+        </div>
+      )}
     </div>
   );
 }

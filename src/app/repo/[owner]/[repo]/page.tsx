@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import RepoHeader from "@/components/RepoHeader";
 import RepoTree from "@/components/RepoTree";
+import FileViewer from "@/components/FileViewer";
 import type { FileData, RepoMeta, TreeNode } from "@/lib/types";
 
 export default function RepoPage({
@@ -99,60 +100,157 @@ export default function RepoPage({
   const title = useMemo(() => `${owner}/${repo}`, [owner, repo]);
 
   return (
-    <main style={{ maxWidth: 1200, margin: "0 auto", padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-        <h1 style={{ margin: 0, fontSize: 22 }}>{title}</h1>
-        <a href="/" style={{ opacity: 0.85, textDecoration: "none" }}>← Home</a>
-      </div>
-
-      {err && (
-        <div style={{ marginTop: 12, padding: 12, background: "#2a0f14", borderRadius: 10 }}>
-          {err}
+    <main 
+      style={{ 
+        height: "100vh",
+        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        padding: "24px 20px",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden"
+      }}
+    >
+      <div style={{ maxWidth: 1400, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 8, flexShrink: 0 }}>
+          <h1 style={{ 
+            margin: 0,
+            fontSize: 26,
+            fontWeight: 700,
+            background: "linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text"
+          }}>
+            {title}
+          </h1>
+          <a 
+            href="/"
+            style={{
+              textDecoration: "none",
+              color: "#94a3b8",
+              fontSize: 15,
+              fontWeight: 500,
+              transition: "color 0.2s ease"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#cbd5e1"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "#94a3b8"}
+          >
+            ← Home
+          </a>
         </div>
-      )}
 
-      {meta && <RepoHeader meta={meta} refName={ref} />}
+        {err && (
+          <div 
+            style={{
+              marginTop: 16,
+              padding: 16,
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              borderRadius: 12,
+              color: "#fca5a5",
+              flexShrink: 0
+            }}
+          >
+            ⚠️ {err}
+          </div>
+        )}
 
-      {truncated && (
-        <div style={{ marginTop: 12, padding: 10, background: "#1c2230", borderRadius: 10, opacity: 0.9 }}>
-          Repo tree was truncated by GitHub for size. Consider implementing “load-on-expand”.
-        </div>
-      )}
+        {meta && <RepoHeader meta={meta} refName={ref} />}
 
-      <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 12, marginTop: 12 }}>
-        <section style={{ background: "#111827", borderRadius: 12, padding: 10, minHeight: 520 }}>
-          <RepoTree owner={owner} repo={repo} refName={ref} nodes={nodes} onSelectFile={setSelectedPath} />
-        </section>
+        {truncated && (
+          <div 
+            style={{
+              marginTop: 16,
+              padding: 14,
+              background: "rgba(251, 191, 36, 0.1)",
+              border: "1px solid rgba(251, 191, 36, 0.3)",
+              borderRadius: 12,
+              color: "#fbbf24",
+              flexShrink: 0
+            }}
+          >
+            ⚠️ Repository tree was truncated by GitHub due to size.
+          </div>
+        )}
 
-        <section style={{ background: "#111827", borderRadius: 12, padding: 16, minHeight: 520 }}>
-          {!selectedPath ? (
-            <div style={{ opacity: 0.85 }}>Select a file from the tree.</div>
-          ) : loadingFile ? (
-            <div style={{ opacity: 0.85 }}>Loading…</div>
-          ) : fileError ? (
-            <div style={{ color: "#fca5a5" }}>Error: {fileError}</div>
-          ) : file ? (
-            <div>
-              <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 12 }}>
-                {file.path}
-              </div>
-              <pre
+        <div style={{ display: "grid", gridTemplateColumns: "420px 1fr", gap: 16, marginTop: 16, flex: 1, overflow: "hidden" }}>
+          <section 
+            style={{
+              background: "rgba(17, 24, 39, 0.6)",
+              backdropFilter: "blur(12px)",
+              borderRadius: 16,
+              padding: 16,
+              overflowY: "auto",
+              border: "1px solid rgba(59, 130, 246, 0.2)",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)"
+            }}
+          >
+            <RepoTree owner={owner} repo={repo} refName={ref} nodes={nodes} onSelectFile={setSelectedPath} />
+          </section>
+
+          <section 
+            style={{
+              overflowY: "auto"
+            }}
+          >
+            {!selectedPath ? (
+              <div 
                 style={{
-                  margin: 0,
-                  padding: 12,
-                  background: "#0f1626",
-                  borderRadius: 8,
-                  fontSize: 12,
-                  overflow: "auto",
-                  maxHeight: 480,
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "rgba(17, 24, 39, 0.4)",
+                  backdropFilter: "blur(12px)",
+                  borderRadius: 16,
+                  border: "1px solid rgba(59, 130, 246, 0.15)",
+                  color: "#94a3b8",
+                  fontSize: 15
                 }}
               >
-                <code>{file.content}</code>
-              </pre>
-            </div>
-          ) : null}
-        </section>
+                <div style={{ textAlign: "center", padding: 40 }}>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>📂</div>
+                  <div>Select a file from the tree to view its contents</div>
+                </div>
+              </div>
+            ) : loadingFile ? (
+              <div 
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "rgba(17, 24, 39, 0.4)",
+                  backdropFilter: "blur(12px)",
+                  borderRadius: 16,
+                  border: "1px solid rgba(59, 130, 246, 0.15)",
+                  color: "#94a3b8",
+                  fontSize: 15
+                }}
+              >
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 32, marginBottom: 12 }}>⟳</div>
+                  <div>Loading file...</div>
+                </div>
+              </div>
+            ) : fileError ? (
+              <div 
+                style={{
+                  padding: 20,
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  borderRadius: 16,
+                  color: "#fca5a5"
+                }}
+              >
+                <div style={{ fontSize: 24, marginBottom: 8 }}>⚠️</div>
+                <div>Error: {fileError}</div>
+              </div>
+            ) : file ? (
+              <FileViewer file={file} />
+            ) : null}
+          </section>
+        </div>
       </div>
     </main>
   );

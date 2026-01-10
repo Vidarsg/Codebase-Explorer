@@ -42,26 +42,73 @@ export default function BlobPage({
   }, [owner, repo, ref, path]);
 
   return (
-    <main style={{ maxWidth: 1200, margin: "0 auto", padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-        <a
-          href={`/repo/${owner}/${repo}?ref=${encodeURIComponent(ref)}`}
-          style={{ textDecoration: "none", opacity: 0.9 }}
-        >
-          ← Back
-        </a>
-        <div style={{ opacity: 0.8, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-          {owner}/{repo} • {path}
+    <main 
+      style={{ 
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        padding: "24px 20px"
+      }}
+    >
+      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 8 }}>
+          <a
+            href={`/repo/${owner}/${repo}?ref=${encodeURIComponent(ref)}`}
+            style={{ 
+              textDecoration: "none",
+              color: "#60a5fa",
+              border: "1px solid rgba(59, 130, 246, 0.4)",
+              background: "rgba(59, 130, 246, 0.1)",
+              padding: "8px 12px",
+              borderRadius: 8,
+              fontSize: 14
+            }}
+          >
+            ← Back
+          </a>
+          <div style={{ color: "#cbd5e1", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+            {owner}/{repo} • {path}
+          </div>
         </div>
+
+        {err && (
+          <div 
+            style={{
+              marginTop: 16,
+              padding: 16,
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              borderRadius: 12,
+              color: "#fca5a5"
+            }}
+          >
+            ⚠️ {err}
+          </div>
+        )}
+
+        {!file && !err && (
+          <div 
+            style={{
+              height: "60vh",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(17, 24, 39, 0.4)",
+              backdropFilter: "blur(12px)",
+              borderRadius: 16,
+              border: "1px solid rgba(59, 130, 246, 0.15)",
+              color: "#94a3b8",
+              fontSize: 15
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>⟳</div>
+              <div>Loading file...</div>
+            </div>
+          </div>
+        )}
+
+        {file && <FileViewer file={file} />}
       </div>
-
-      {err && (
-        <div style={{ marginTop: 12, padding: 12, background: "#2a0f14", borderRadius: 10 }}>
-          {err}
-        </div>
-      )}
-
-      {file && <FileViewer file={file} />}
     </main>
   );
 }

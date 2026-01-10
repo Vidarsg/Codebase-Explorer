@@ -64,34 +64,64 @@ export default function RepoTree({
   };
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <input
+        type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search paths…"
+        placeholder="🔍 Filter files..."
         style={{
           width: "100%",
-          padding: "10px 10px",
+          padding: "10px 12px",
+          background: "rgba(17, 24, 39, 0.6)",
+          border: "1px solid rgba(59, 130, 246, 0.3)",
           borderRadius: 10,
-          border: "1px solid #253047",
-          background: "#0f1626",
-          color: "#e8eefc",
+          color: "#f1f5f9",
+          fontSize: 14,
           outline: "none",
-          marginBottom: 10,
+          transition: "all 0.2s ease",
+          marginBottom: 12,
+          flexShrink: 0
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.6)";
+          e.currentTarget.style.background = "rgba(17, 24, 39, 0.8)";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.3)";
+          e.currentTarget.style.background = "rgba(17, 24, 39, 0.6)";
         }}
       />
 
-      {query.trim() ? (
-        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 8 }}>
-          Showing matching files
+      {query.trim() && (
+        <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8, paddingLeft: 8 }}>
+          {filtered.length} {filtered.length === 1 ? "match" : "matches"}
         </div>
-      ) : null}
+      )}
 
-      <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13 }}>
+      <div 
+        style={{ 
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+          fontSize: 13,
+          color: "#e2e8f0",
+          flex: 1,
+          overflow: "auto"
+        }}
+      >
         {filtered.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No results</div>
+          <div style={{ color: "#64748b", padding: "20px 8px", textAlign: "center" }}>
+            {query.trim() ? "No matching files" : "No files"}
+          </div>
         ) : (
-          <TreeList nodes={filtered} onSelectFile={onSelectFile} depth={0} flat={Boolean(query.trim())} onLoadChildren={loadChildren} loadedChildren={loadedChildren} loading={loading} />
+          <TreeList 
+            nodes={filtered}
+            onSelectFile={onSelectFile}
+            depth={0}
+            flat={Boolean(query.trim())}
+            onLoadChildren={loadChildren}
+            loadedChildren={loadedChildren}
+            loading={loading}
+          />
         )}
       </div>
     </div>
@@ -161,17 +191,24 @@ function TreeItem({
       <div
         onClick={() => onSelectFile(node.path)}
         style={{
-          padding: "6px 8px",
+          padding: "7px 10px",
           marginLeft: pad,
-          borderRadius: 8,
+          borderRadius: 6,
           cursor: "pointer",
-          opacity: 0.92,
+          color: "#cbd5e1",
+          transition: "all 0.15s ease"
         }}
-        onMouseEnter={(e) => ((e.currentTarget.style.background = "#0f1626"))}
-        onMouseLeave={(e) => ((e.currentTarget.style.background = "transparent"))}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(59, 130, 246, 0.15)";
+          e.currentTarget.style.color = "#93c5fd";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = "#cbd5e1";
+        }}
         title={node.path}
       >
-        {flat ? node.path : node.name}
+        📄 {flat ? node.path : node.name}
       </div>
     );
   }
@@ -184,18 +221,25 @@ function TreeItem({
       <div
         onClick={handleDirClick}
         style={{
-          padding: "6px 8px",
+          padding: "7px 10px",
           marginLeft: pad,
-          borderRadius: 8,
+          borderRadius: 6,
           cursor: "pointer",
-          opacity: 0.95,
+          color: "#e2e8f0",
           fontWeight: 600,
+          transition: "all 0.15s ease"
         }}
-        onMouseEnter={(e) => ((e.currentTarget.style.background = "#0f1626"))}
-        onMouseLeave={(e) => ((e.currentTarget.style.background = "transparent"))}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(168, 139, 250, 0.15)";
+          e.currentTarget.style.color = "#c4b5fd";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = "#e2e8f0";
+        }}
         title={node.path}
       >
-        {isLoading ? "⟳ " : open ? "▾ " : "▸ "}
+        {isLoading ? "⟳ " : open ? "📂 " : "📁 "}
         {node.name}
       </div>
       {open && hasChildren && (

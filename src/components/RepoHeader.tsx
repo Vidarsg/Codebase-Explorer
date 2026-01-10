@@ -10,10 +10,20 @@ export default function RepoHeader({ meta, refName }: { meta: RepoMeta; refName:
   const githubUrl = `https://github.com/${meta.fullName}`;
 
   return (
-    <section style={{ marginTop: 12, background: "#111827", borderRadius: 12, padding: 14 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div>
-          <div style={{ fontSize: 18, marginBottom: 6 }}>
+    <section 
+      style={{ 
+        marginTop: 16, 
+        background: "rgba(17, 24, 39, 0.6)",
+        backdropFilter: "blur(12px)",
+        border: "1px solid rgba(59, 130, 246, 0.2)",
+        borderRadius: 16,
+        padding: 20,
+        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)"
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 16, marginBottom: 16 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 19, marginBottom: 8, fontWeight: 600, color: "#f1f5f9" }}>
             {meta.fullName}
             <a
               href={githubUrl}
@@ -22,23 +32,46 @@ export default function RepoHeader({ meta, refName }: { meta: RepoMeta; refName:
               style={{
                 marginLeft: 12,
                 fontSize: 14,
-                opacity: 0.8,
                 textDecoration: "none",
                 color: "#60a5fa",
+                fontWeight: 500,
+                transition: "all 0.2s ease"
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#93c5fd";
+                e.currentTarget.style.textDecoration = "underline";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#60a5fa";
+                e.currentTarget.style.textDecoration = "none";
+              }}
             >
               View on GitHub →
             </a>
           </div>
-          {meta.description && <div style={{ opacity: 0.85 }}>{meta.description}</div>}
-          <div style={{ opacity: 0.75, marginTop: 8 }}>
-            Branch/ref: <code>{refName}</code> • Updated:{" "}
-            {new Date(meta.updatedAt).toLocaleString()}
+          {meta.description && (
+            <div style={{ color: "#cbd5e1", lineHeight: 1.5, marginBottom: 10 }}>
+              {meta.description}
+            </div>
+          )}
+          <div 
+            style={{ 
+              fontSize: 13, 
+              color: "#94a3b8",
+              display: "flex",
+              gap: 16,
+              flexWrap: "wrap"
+            }}
+          >
+            <span>
+              📌 <code style={{ marginLeft: 4, color: "#60a5fa" }}>{refName}</code>
+            </span>
+            <span>
+              🕒 Updated {new Date(meta.updatedAt).toLocaleString()}
+            </span>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start", whiteSpace: "nowrap" }}>
+        <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
           <Stat label="Stars" value={formatNum(meta.stars)} />
           <Stat label="Forks" value={formatNum(meta.forks)} />
           <Stat label="Issues" value={formatNum(meta.openIssues)} />
@@ -46,13 +79,29 @@ export default function RepoHeader({ meta, refName }: { meta: RepoMeta; refName:
       </div>
 
       {langEntries.length > 0 && total > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", opacity: 0.9 }}>
+        <div 
+          style={{ 
+            paddingTop: 16,
+            borderTop: "1px solid rgba(59, 130, 246, 0.15)"
+          }}
+        >
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {langEntries
               .sort((a, b) => b[1] - a[1])
               .slice(0, 8)
               .map(([k, v]) => (
-                <span key={k} style={{ background: "#0f1626", border: "1px solid #253047", padding: "6px 10px", borderRadius: 999 }}>
+                <span 
+                  key={k} 
+                  style={{ 
+                    background: "rgba(59, 130, 246, 0.1)", 
+                    border: "1px solid rgba(59, 130, 246, 0.25)", 
+                    padding: "6px 12px", 
+                    borderRadius: 6,
+                    fontSize: 13,
+                    color: "#93c5fd",
+                    fontWeight: 500
+                  }}
+                >
                   {k} {Math.round((v / total) * 100)}%
                 </span>
               ))}
@@ -65,9 +114,9 @@ export default function RepoHeader({ meta, refName }: { meta: RepoMeta; refName:
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ textAlign: "right" }}>
-      <div style={{ opacity: 0.7, fontSize: 12 }}>{label}</div>
-      <div style={{ fontSize: 16 }}>{value}</div>
+    <div style={{ textAlign: "right", minWidth: 60 }}>
+      <div style={{ color: "#94a3b8", fontSize: 12, marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: "#f1f5f9" }}>{value}</div>
     </div>
   );
 }
