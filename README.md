@@ -74,10 +74,9 @@ src/
 │   │       ├── tree/         # File tree endpoint (lazy-load)
 │   │       └── file/         # File content endpoint
 │   └── repo/
-│       ├── [owner]/[repo]/   # Repository explorer page
-│       └── blob/[...path]/   # Direct file viewer page
+│       └── [owner]/[repo]/   # Repository analytics page
 ├── components/
-│   ├── FileViewer.tsx        # Code display component
+│   ├── RepoAnalytics.tsx     # Repository statistics and insights
 │   ├── RepoHeader.tsx        # Repository info & stats
 │   ├── RepoInput.tsx         # Repository search form
 │   └── RepoTree.tsx          # File tree with lazy loading

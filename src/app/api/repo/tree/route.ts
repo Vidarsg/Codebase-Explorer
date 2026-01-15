@@ -48,9 +48,9 @@ export async function GET(req: NextRequest) {
         nodes,
       });
     } else {
-      // Load only root level (non-recursive) - use buildTree for initial load
+      // Load entire tree recursively
       tree = await ghFetch<TreeResp>(
-        `/repos/${owner}/${repo}/git/trees/${commit.sha}`,
+        `/repos/${owner}/${repo}/git/trees/${commit.sha}?recursive=1`,
         { next: { revalidate: 900 } }
       );
 
